@@ -1,50 +1,52 @@
 from netmiko import ConnectHandler
 import getpass
 
-password = getpass.getpass("Input password for SSH: ")
+username = input("Username: ")
+password = getpass.getpass("Password: ")
 
-devices = {
-    'device_type': 'cisco_ios',
-    'host': '10.100.255.7',
-    'username': '3pshrespa',
-    'password': password,
-    'disabled_algorithms': {
-            "pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]}
+with open("device_list.txt", "r") as f:
     
-    }
+    for ip_address in f:
+        ip_host = ip_address.strip()
 
-net_connect = ConnectHandler(**devices)
-net_connect.enable()
+        devices = {
+            'device_type': 'cisco_ios',
+            'host': ip_host,
+            'username': username,
+            'password': password,
+            'disabled_algorithms': {
+                    "pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]}
+            
+            }
 
-ip_info = net_connect.send_command("show ip int br | ex unas ", read_timeout = 30, use_textfsm = True)
-version_info = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
-net_connect.disconnect()
+        net_connect = ConnectHandler(**devices)
+        net_connect.enable()
 
-#print(version_info)
+        ip_info = net_connect.send_command("show ip int br | ex unas ", read_timeout = 30, use_textfsm = True)
+        version_info = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
+        net_connect.disconnect()
 
-for info in version_info:
-    software_image = info["software_image"]
-    software_version = info["version"]
-    hostname = info["hostname"]
-    hardware = info["hardware"]
-    mac_addr = info["mac_address"]
-    serial = info["serial"]
-    print(f"HOSTNAME : {hostname} \n    software: {software_version} \n    hardware: {hardware} \n    MAC: {mac_addr} \n    Serial: {serial} ")
-          
+        #print(version_info)
 
+        for info in version_info:
+            software_image = info["software_image"]
+            software_version = info["version"]
+            hostname = info["hostname"]
+            hardware = info["hardware"]
+            mac_addr = info["mac_address"]
+            serial = info["serial"]
+            print(f"HOSTNAME : {hostname} \n    software: {software_version} \n    hardware: {hardware} \n    MAC: {mac_addr} \n    Serial: {serial} ")
+                
+        print()
+        print("    IP ADDRESS INFO")
 
-# print("--------------------------------------------------------")
-# print(command_output_1)
-print()
-print("    IP ADDRESS INFO")
+        for ips in ip_info:
+            interface = ips["interface"]
+            ipaddr = ips["ip_address"]
 
-for ips in ip_info:
-    interface = ips["interface"]
-    ipaddr = ips["ip_address"]
+            print(f"      {interface}:{ipaddr}")
 
-    print(f"      {interface}:{ipaddr}")
-
-print("--------------------------------------------------------")
+        print("--------------------------------------------------------")
 
 
 
