@@ -26,27 +26,38 @@ with open("device_list.txt", "r") as f:
         version_info = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
         net_connect.disconnect()
 
+        output_lines = []
+
         #print(version_info)
 
         for info in version_info:
             software_image = info["software_image"]
             software_version = info["version"]
             hostname = info["hostname"]
-            hardware = info["hardware"]
-            mac_addr = info["mac_address"]
-            serial = info["serial"]
-            print(f"HOSTNAME : {hostname} \n    software: {software_version} \n    hardware: {hardware} \n    MAC: {mac_addr} \n    Serial: {serial} ")
+            hardware = ", ".join(info["hardware"])
+            mac_addr = ", ".join(info["mac_address"])
+            serial = ", ".join(info["serial"])
+            output_lines.append(f"HOSTNAME : {hostname} \n    software: {software_version} \n    hardware: {hardware} \n    MAC: {mac_addr} \n    Serial: {serial} ")
                 
-        print()
-        print("    IP ADDRESS INFO")
+        
+        output_lines.append("\n    IP ADDRESS INFO")
 
         for ips in ip_info:
             interface = ips["interface"]
             ipaddr = ips["ip_address"]
 
-            print(f"      {interface}:{ipaddr}")
+            output_lines.append(f"      {interface}:{ipaddr}")
 
-        print("--------------------------------------------------------")
+        output_lines.append("--------------------------------------------------------")
+
+        final_output = f"\n".join(output_lines)
+
+        file_name = f"{hostname}_device_info.txt"
+
+        with open(f"/home/spandan/Desktop/Automation/switch_info/{file_name}", "w") as f:
+            f.write(final_output)
+
+
 
 
 
