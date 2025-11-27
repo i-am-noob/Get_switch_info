@@ -15,14 +15,14 @@ devices = {
 
 net_connect = ConnectHandler(**devices)
 net_connect.enable()
-#command_output_1 = net_connect.send_command("show running | inc hostname", read_timeout = 30, use_textfsm = True)
-command_output_2 = net_connect.send_command("show ip int br | ex unas ", read_timeout = 30, use_textfsm = True)
-command_output_3 = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
+
+ip_info = net_connect.send_command("show ip int br | ex unas ", read_timeout = 30, use_textfsm = True)
+version_info = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
 net_connect.disconnect()
 
-#print(command_output_3)
+#print(version_info)
 
-for info in command_output_3:
+for info in version_info:
     software_image = info["software_image"]
     software_version = info["version"]
     hostname = info["hostname"]
@@ -38,7 +38,7 @@ for info in command_output_3:
 print()
 print("    IP ADDRESS INFO")
 
-for ips in command_output_2:
+for ips in ip_info:
     interface = ips["interface"]
     ipaddr = ips["ip_address"]
 
