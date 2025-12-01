@@ -10,9 +10,9 @@ def get_cred():
 
 def main():
 
-    username, password = get_cred()
-    print(f"Username: {username}") 
-    print(f"Password: {password}")
+    user, pwd = get_cred()
+    print(f"Username: {user}") 
+    print(f"Password: {pwd}")
 
 if __name__ == "__main__":
     main()
