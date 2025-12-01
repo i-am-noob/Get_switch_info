@@ -3,10 +3,11 @@
 def read_device_list(file_path):
     ip = []
     with open(file_path, "r") as f:
-        for ips in f:
-            cleaned = ips.strip()
-            if cleaned:
-                ip.append(cleaned)
+        # for ips in f:
+        #     cleaned = ips.strip()
+        #     if cleaned:
+        #         ip.append(cleaned)
+        ip = [ ips.strip() for ips in f if ips.strip()]
             
             
     return ip
