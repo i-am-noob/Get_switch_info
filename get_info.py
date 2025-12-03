@@ -1,7 +1,8 @@
 from netmiko import ConnectHandler
 import getpass
 from datetime import datetime
-import os
+
+
 
 
 
