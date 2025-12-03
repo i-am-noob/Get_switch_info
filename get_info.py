@@ -1,14 +1,31 @@
 from netmiko import ConnectHandler
 import getpass
+from datetime import datetime
+import os
 
-username = input("Username: ")
-password = getpass.getpass("Password: ")
 
-with open("device_list.txt", "r") as f:
+
+
+def get_credentials():
     
-    for ip_address in f:
-        ip_host = ip_address.strip()
+    username = input("Username: ")
+    password = getpass.getpass("Password: ")
 
+    return username, password
+
+
+
+def get_device_ip(file_path):
+    
+    with open(file_path, "r") as f:
+         ip = [ ips.strip() for ips in f if ips.strip()]
+
+    return ip
+    
+
+
+def create_device(ip_host, username, password):
+        
         devices = {
             'device_type': 'cisco_ios',
             'host': ip_host,
@@ -18,20 +35,27 @@ with open("device_list.txt", "r") as f:
                     "pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]}
             
             }
+        return devices
 
-        net_connect = ConnectHandler(**devices)
-        net_connect.enable()
 
+
+def collect_data(net_connect):
+                        
         ip_info = net_connect.send_command("show ip int br | ex unas ", read_timeout = 30, use_textfsm = True)
         version_info = net_connect.send_command("show version ", read_timeout = 30, use_textfsm = True)
-        net_connect.disconnect()
+        print(version_info)
+        #net_connect.disconnect()
+        return ip_info, version_info
 
+def format_data(version_info, ip_info):
+        
+                
         output_lines = []
 
         #print(version_info)
 
         for info in version_info:
-            software_image = info["software_image"]
+            #software_image = info["software_image"]
             software_version = info["version"]
             hostname = info["hostname"]
             hardware = ", ".join(info["hardware"])
@@ -52,10 +76,47 @@ with open("device_list.txt", "r") as f:
 
         final_output = f"\n".join(output_lines)
 
-        file_name = f"{hostname}_device_info.txt"
+        return final_output, hostname
 
-        with open(f"/home/spandan/Desktop/Automation/switch_info/{file_name}", "w") as f:
-            f.write(final_output)
+        #file_name = f"{hostname}_device_info.txt"
+
+def write_output_file(text, hostname):
+            
+            dir_path = "/home/spandan/Desktop/Python_Practice/Output"
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+
+            file_path = f"{dir_path}/{hostname}_{timestamp}_device_info.txt"     
+            
+            with open(file_path, "w") as f:
+                  f.write(text)
+                                
+                                
+
+def main():
+     username,password = get_credentials()
+     ip_list = get_device_ip("/home/spandan/Desktop/Python_Practice/file.txt")
+
+     for ip in ip_list:
+            
+            device = create_device(ip, username, password)
+            net_connect = ConnectHandler(**device)
+            net_connect.enable()
+
+            ip_info, version_info = collect_data(net_connect)
+            net_connect.disconnect()
+
+            final_text, hostname = format_data(version_info, ip_info)
+            write_output_file(final_text, hostname)
+
+if __name__ == "__main__":
+       main()
+
+
+
+
+
+
 
 
 
